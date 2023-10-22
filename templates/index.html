@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Tournament Tool</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="{{url_for('templates', path='/dist/index.css')}}" rel="stylesheet">
+	<script src="https://unpkg.com/htmx.org@1.9.6"
+		integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+		crossorigin="anonymous"></script>
+
+	<!-- Refresh site - Dev -->
+	<meta http-equiv="refresh" content="5">
+
+</head>
+
+<body class="flex flex-col">
+
+	<!-- Current match banner -->
+	<div class="p-10 border-solid border-b-2 border-gray-500">
+		This is a current match going on. 1v1 status winning! :D
+	</div>
+
+	<!-- Match stuff -->
+	<div class="flex flex-row flex-grow w-screen">
+		<!-- Match List -->
+		<ul>
+			{% for match in matches %}
+			<li class="flex justify-between gap-x-6 py-5" id="match-{{match.id}}" hx-get="/match?match_id={{match.id}}"
+				hx-trigger="click" hx-target="#side-player" hx-replace="innerHTML">
+
+				<div class="flex min-w-0 gap-x-4">
+					<div class="min-w-0 flex-auto px-10">
+						<p class="text-xl font-semibold leading-6 text-gray-900">{{ match.name
+							}}</p>
+					</div>
+				</div>
+				<div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end px-10">
+					<p class="text-sm leading-6 text-gray-900">{{ match.status }}</p>
+				</div>
+			</li>
+			{% endfor %}
+		</ul>
+		<!-- Match Data -->
+		<div class="flex-grow border-solid border-x-2 border-gray-500">
+			<!-- This div is getting replaced with match data -->
+			<div id="side-player" hx-trigger="load" hx-get="/match?match_id=1"></div>
+		</div>
+	</div>
+</body>
+
+</html>
