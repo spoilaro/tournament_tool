@@ -84,6 +84,14 @@ def root(request: Request):
     })
 
 
+@app.get("/init", response_class=HTMLResponse)
+def root(request: Request):
+
+    return templates.TemplateResponse("create_tournament.html", {
+        "request": request
+    })
+
+
 @ app.get("/match")
 async def get_match(request: Request, match_id: str = None):
 
