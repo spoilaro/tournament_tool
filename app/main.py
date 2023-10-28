@@ -4,8 +4,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import sqlite3
 
+from app.tournament import Tournament
+
 from app.data import Match, Player, PlayerMatchData
 
+tournament = Tournament()
 app = FastAPI()
 app.mount('/templates', StaticFiles(directory='templates'), name='templates')
 
@@ -30,9 +33,14 @@ def get_matches() -> list[Match]:
             ma.map_name
         FROM
             matches m,
-            maps ma
+            maps ma,
+            tournaments tt
         WHERE
             m.map_id = ma.map_id
+        AND
+            tt.tournament_id = m.tournament_id
+        AND
+            tt.tournament_status = 'ONGOING'
         """
     cursor.execute(query)
     matches = cursor.fetchall()
@@ -79,13 +87,16 @@ def get_players_in_match(match_id: str) -> list[Player]:
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request):
 
+    if not tournament.check_active_tournament():
+        return HTMLResponse("<h1>No active tournament</h1>")
+
     return templates.TemplateResponse("index.html", {
         "request": request, "matches": get_matches()
     })
 
 
 @app.get("/init", response_class=HTMLResponse)
-def root(request: Request):
+def create_tournament(request: Request):
 
     return templates.TemplateResponse("create_tournament.html", {
         "request": request
@@ -114,7 +125,8 @@ async def get_match(request: Request, match_id: str = None):
 
     cursor.execute(query, (match_id,))
     raw_match = cursor.fetchone()
-    match = Match(id=raw_match[0], name=raw_match[1], status=raw_match[2], map=raw_match[3])
+    match = Match(id=raw_match[0], name=raw_match[1],
+                  status=raw_match[2], map=raw_match[3])
 
     return templates.TemplateResponse("match_data.html", {
         "request": request,

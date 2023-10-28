@@ -1,18 +1,35 @@
+CREATE TABLE tournaments (
+	tournament_id UUID PRIMARY KEY,
+	tournament_name TEXT,
+	tournament_status TEXT DEFAULT "NOT_STARTED"
+);
+
+CREATE TABLE tournament_options (
+	option_id INTEGER PRIMARY KEY AUTOINCREMENT,
+	tournament_id UUID NOT NULL,
+	map INTEGER NOT NULL,
+	time_limit INTEGER NOT NULL
+);
+
 CREATE TABLE players (
 	player_id INTEGER PRIMARY KEY AUTOINCREMENT,
-	player_name TEXT
+	player_name TEXT,
+	tournament_id UUID NOT NULL,
+	FOREIGN KEY(tournament_id) REFERENCES tournaments(tournament_id)
 );
 
 CREATE TABLE matches (
-	match_id INTEGER PRIMARY KEY AUTOINCREMENT,
+	match_id UUID PRIMARY KEY,
 	match_name TEXT,
-	status TEXT DEFAULT "ONGOING",
+	status TEXT DEFAULT "NOT_STARTED",
 	map_id INTEGER NOT NULL,
-	FOREIGN KEY(map_id) REFERENCES maps(map_id)
+	tournament_id UUID NOT NULL,
+	FOREIGN KEY(map_id) REFERENCES maps(map_id),
+	FOREIGN KEY(tournament_id) REFERENCES tournaments(tournament_id)
 );
 
 CREATE TABLE players_in_matches (
-	match_id INTEGER NOT NULL,
+	match_id UUID NOT NULL,
 	player_id INTEGER NOT NULL,
 	side TEXT NOT NULL,
 	FOREIGN KEY(match_id) REFERENCES matches(match_id),
@@ -25,26 +42,6 @@ CREATE TABLE maps (
 );
 
 
--- Demo players
-INSERT INTO players (player_name) values ("GetRight");
-INSERT INTO players (player_name) values ("Simple");
-INSERT INTO players (player_name) values ("Spoilar");
-INSERT INTO players (player_name) values ("Some");
-
 -- Demo Maps
 INSERT INTO maps (map_name) values ("Dust II");
 
--- Demo matches
-INSERT INTO matches (match_name, map_id) values ("GetRight VS Simple", 1);
-INSERT INTO matches (match_name, status, map_id) values ("Spoilar VS Some", "OVER", 1);
-
--- Demo players in matches
--- Match 1
-INSERT INTO players_in_matches (match_id, player_id, side) values (1, 1, "T"); -- GetRight
-INSERT INTO players_in_matches (match_id, player_id, side) values (1, 2, "CT"); -- Simple
-INSERT INTO players_in_matches (match_id, player_id, side) values (1, 3, "T"); -- Spoilar
-INSERT INTO players_in_matches (match_id, player_id, side) values (1, 4, "CT"); -- Some
-
--- Match2
-INSERT INTO players_in_matches (match_id, player_id, side) values (2, 3, "T"); -- Spoilar
-INSERT INTO players_in_matches (match_id, player_id, side) values (2, 4, "CT"); -- Some
